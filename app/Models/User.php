@@ -21,7 +21,23 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'phone',
+        'address',
+        'image',
+        'role',
+        'trust_level',
+        'sell_count',
+        'reward_points',
+        'oauth_id',
+        'oauth_type',
+        'oauth_image',
     ];
+
+    //connect with social media link
+    public function links()
+    {
+        return $this->hasMany(SocialMediaProfileLink::class);
+    }
 
     /**
      * The attributes that should be hidden for serialization.
