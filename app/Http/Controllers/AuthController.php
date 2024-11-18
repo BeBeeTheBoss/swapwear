@@ -56,10 +56,9 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        $request->validate([
-            'phone' => 'required',
-            'password' => 'required'
-        ]);
+        if (!isset($request->loginMethod)) {
+            return sendResponse(null, 401, "Please input login method");
+        }
 
         if ($request->loginMethod == 'phone') {
             $user = $this->loginWithPhoneNumber($request->phone, $request->password);
