@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -56,11 +56,11 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        if (!isset($request->loginMethod)) {
+        if (!isset($request->login_method)) {
             return sendResponse(null, 401, "Please input login method");
         }
 
-        if ($request->loginMethod == 'phone') {
+        if ($request->login_method == 'phone') {
             $user = $this->loginWithPhoneNumber($request->phone, $request->password);
         }
 
