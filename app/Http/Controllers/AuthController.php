@@ -26,6 +26,11 @@ class AuthController extends Controller
         DB::beginTransaction();
         try {
 
+            $user = $this->model->where('phone',$request->phone)->first();
+            if($user){
+                return sendResponse(null,401,'Phone number already registered');
+            }
+
             $user = $this->model->create($this->toArray($request->except(['image'])));
 
             $user = $this->model->find($user->id);
