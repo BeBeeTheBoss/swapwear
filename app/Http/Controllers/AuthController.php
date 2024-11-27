@@ -31,7 +31,7 @@ class AuthController extends Controller
                 return sendResponse(null,401,'Phone number already registered');
             }
 
-            $user = $this->model->create($this->toArray($request->except(['image'])));
+            $user = $this->model->create($request->image ? $this->toArray($request->except('image')) : $this->toArray($request));
 
             $user = $this->model->find($user->id);
             Auth::login($user);
