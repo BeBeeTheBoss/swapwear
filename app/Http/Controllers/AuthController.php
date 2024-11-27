@@ -26,7 +26,7 @@ class AuthController extends Controller
         DB::beginTransaction();
         try {
 
-            $user = $this->model->create($this->toArray($request));
+            $user = $this->model->create($this->toArray($request->except(['image'])));
 
             $user = $this->model->find($user->id);
             Auth::login($user);
