@@ -7,6 +7,7 @@
     <title>{{ env('APP_NAME') }}</title>
     <link rel="shortcut icon" href="{{ asset('images/logo.avif') }}" type="image/x-icon">
     @vite('resources/js/app.js')
+    @routes
     @inertiaHead
 </head>
 

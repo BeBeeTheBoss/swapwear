@@ -5,7 +5,7 @@
         </div>
         <form class="form border shadow">
             <div class="h4 mb-4 fw-bold text-center" :style="{ color: $themeColor }">
-                Lovecar Business Dashboard
+                {{ $appName }} Dashboard
             </div>
             <div class="flex-column">
                 <label :style="{ color: $themeColor }">Phone </label>
@@ -13,7 +13,8 @@
             <div class="inputForm" style="position:relative">
                 <font-awesome-icon icon="fa-solid fa-phone" :style="{ color: $themeColor }"
                     style="position:absolute;left:10px" />
-                <input type="text" v-model="form.phone" class="input" placeholder="Enter your Phone" @keyup.enter="login">
+                <input type="text" v-model="form.phone" class="input" placeholder="Enter your Phone"
+                    @keyup.enter="login">
             </div>
 
             <div class="flex-column">
@@ -39,7 +40,8 @@
                 </div> -->
                 <span class="span">Forgot password?</span>
             </div>
-            <button type="button" :style="{ backgroundColor: $themeColor }" @click="login" class="button-submit">
+            <button type="button" :style="{ backgroundColor: $themeColor }" @click="login" class="button-submit"
+                :disabled="loading">
                 <div v-if="loading" style="width:25px;height:25px" class="spinner-border text-white" role="status">
                 </div>
                 <span v-if="!loading" style="transition:0.5">
@@ -56,70 +58,32 @@ import ErrorToast from './Components/ErrorToast.vue';
 import axios from 'axios';
 import { inject, ref, onMounted } from "vue";
 import { useForm, router } from '@inertiajs/vue3';
+import { route } from '../../../vendor/tightenco/ziggy/src/js';
 
 const showPw = ref(false);
 const loading = ref(false);
 const baseUrl = inject('baseUrl');
-const errorToasts = ref([]);
 
 const form = useForm({
     phone: "",
-    password: ""
+    password: "",
+    login_method: "phone",
+    login_from: "dashboard"
 });
-
-onMounted(() => {
-    let token = localStorage.getItem('token');
-    if (token) {
-        router.post('/setToken',{token: token});
-        router.get('/dashboard');
-    }
-})
 
 const login = () => {
 
     loading.value = true;
 
-    axios.post(`${baseUrl}/loginBA`, {
-        phone: form.phone,
-        password: form.password,
-    }).then((response) => {
-        loading.value = false;
-        console.log(response);
-
-        if (response.data.data == null) {
-            errorToasts.value.push(response.data.message);
-            setTimeout(() => {
-                errorToasts.value.shift()
-            }, 2000)
+    form.post(route('login'), {
+        onSuccess: () => {
+            loading.value = false;
+        },
+        onError: () => {
+            loading.value = false;
         }
-
-        if (response.data.user) {
-            localStorage.setItem('token', response.data.token);
-            localStorage.setItem('user', response.data.user);
-            router.post('/setToken',{token: response.data.token});
-            router.get('/dashboard');
-        }
-
-
-    }).catch((error) => {
-        console.log(error);
-
-        loading.value = false;
-        if (error.response.data.errors.phone) {
-            errorToasts.value.push(error.response.data.errors.phone[0]);
-            setTimeout(() => {
-                errorToasts.value.shift()
-            }, 2000)
-        }
-
-        if (error.response.data.errors.password) {
-            errorToasts.value.push(error.response.data.errors.password[0]);
-            setTimeout(() => {
-                errorToasts.value.shift()
-            }, 2000)
-        }
-
     })
+
 };
 
 </script>

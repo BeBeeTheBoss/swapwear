@@ -26,9 +26,9 @@ class AuthController extends Controller
         DB::beginTransaction();
         try {
 
-            $user = $this->model->where('phone',$request->phone)->first();
-            if($user){
-                return sendResponse(null,401,'Phone number already registered');
+            $user = $this->model->where('phone', $request->phone)->first();
+            if ($user) {
+                return sendResponse(null, 401, 'Phone number already registered');
             }
 
             $user = $this->model->create($request->image ? $this->toArray($request->except('image')) : $this->toArray($request));
@@ -99,6 +99,36 @@ class AuthController extends Controller
         }
 
         return sendResponse(null, 404, "Already logged out");
+    }
+
+    public function adminLogin(Request $request)
+    {
+
+        $request->validate([
+            'phone' => 'required',
+            'password' => 'required'
+        ]);
+
+
+        $user = $this->loginWithPhoneNumber($request->phone, $request->password);
+
+        if (!$user) {
+            return back();
+        }
+
+        if ($user->role != 'admin') {
+            return back();
+        }
+
+        Auth::loginUsingId($user->id);
+        $token = $user->createToken(config('app.name') . '_Token')->plainTextToken;
+
+        $data = [
+            'user' => new UserResource($user),
+            'token' => $token
+        ];
+
+        return sendResponse($data, 200, "Login success! Welcome back from " . config('app.name'));
     }
 
     private function loginWithPhoneNumber($phone, $password)
