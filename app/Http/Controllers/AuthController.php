@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Inertia\Inertia;
 use Illuminate\Http\Request;
 use App\Http\Requests\UserRequest;
 use Illuminate\Support\Facades\DB;
@@ -10,11 +11,17 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Session;
 
 class AuthController extends Controller
 {
 
     public function __construct(protected User $model) {}
+
+
+    public function loginPage(){
+        return Inertia::render('Login');
+    }
 
     public function getUsers()
     {
@@ -113,22 +120,18 @@ class AuthController extends Controller
         $user = $this->loginWithPhoneNumber($request->phone, $request->password);
 
         if (!$user) {
+            Session::flash('error','Login failed!, Please check your information');
             return back();
         }
 
         if ($user->role != 'admin') {
+            Session::flash('error','You are not an admin');
             return back();
         }
 
         Auth::loginUsingId($user->id);
-        $token = $user->createToken(config('app.name') . '_Token')->plainTextToken;
 
-        $data = [
-            'user' => new UserResource($user),
-            'token' => $token
-        ];
-
-        return sendResponse($data, 200, "Login success! Welcome back from " . config('app.name'));
+        return redirect()->route('dashboard');
     }
 
     private function loginWithPhoneNumber($phone, $password)

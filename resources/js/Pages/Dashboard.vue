@@ -1,14 +1,11 @@
 <template>
     <Layout>
         <div class="container mt-8 h4">
-            My Businesses
+            Dashboard
         </div>
-        <div class="container flex justify-center items-center" style="position:absolute;top:20px;height:120vh" v-if="loading">
-            <Carloader style="margin-bottom: 100px;"/>
-        </div>
-        <div v-else class="container rounded-lg pt-3" style="height:90vh">
+        <div class="container rounded-lg pt-3" style="height:90vh">
             <div class="row">
-                <Card v-for="business in businesses" :key="business" :business="business"/>
+
             </div>
         </div>
     </Layout>
@@ -27,25 +24,8 @@ const baseUrl = inject('baseUrl');
 const businesses = ref(null);
 
 onMounted(() => {
-    let token = localStorage.getItem('token');
-    if(!token){
-        router.get('/login');
-    }
 
-    loading.value = true;
 
-    axios.get(`${baseUrl}/shops/getShops`,{
-        headers: {
-            Authorization : `Bearer ${token}`
-        }
-    }).then((response) => {
-        console.log(response);
-        businesses.value = response.data.data;
-        loading.value = false;
-
-    }).catch((error) => {
-
-    })
 
 })
 

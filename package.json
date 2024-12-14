@@ -18,9 +18,13 @@
         "@fortawesome/free-regular-svg-icons": "^6.7.1",
         "@fortawesome/free-solid-svg-icons": "^6.7.1",
         "@fortawesome/vue-fontawesome": "^3.0.8",
-        "@inertiajs/vue3": "^1.2.0",
+        "@inertiajs/inertia": "^0.11.1",
+        "@inertiajs/inertia-vue3": "^0.6.0",
+        "@inertiajs/vue3": "^2.0.0",
         "@vitejs/plugin-vue": "^4.0.0",
         "bootstrap": "^5.3.3",
-        "ziggy": "^2.4.0"
+        "vue-toastification": "^2.0.0-rc.5",
+        "ziggy": "^2.4.0",
+        "ziggy-js": "^2.4.1"
     }
 }

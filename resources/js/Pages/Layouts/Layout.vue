@@ -4,7 +4,7 @@
         <div class="container">
             <slot/>
         </div>
-        <Navbar v-if="currentUrl != '/dashboard'"/>
+        <Navbar/>
     </v-container>
 </template>
 

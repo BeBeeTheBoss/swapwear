@@ -5,15 +5,27 @@ import { createApp, h } from 'vue'
 import { createInertiaApp } from '@inertiajs/vue3'
 import axios from 'axios';
 
+
+//vue toastification
+import Toast from "vue-toastification";
+import "vue-toastification/dist/index.css";
+
+
+import {ref} from 'vue';
+
+//link
+import { Link } from '@inertiajs/vue3';
+
 //ziggy
-import { ZiggyVue } from '../../vendor/tightenco/ziggy';
+import { ZiggyVue } from "../../vendor/tightenco/ziggy";
+import {route} from 'ziggy-js';
 
 //fontawesome
 import { library } from "@fortawesome/fontawesome-svg-core";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 
-import { faMagnifyingGlass, faPhone, faLock, faWrench, faCircleCheck, faClock } from "@fortawesome/free-solid-svg-icons";
-library.add(faMagnifyingGlass, faPhone, faLock, faWrench, faCircleCheck, faClock);
+import { faMagnifyingGlass, faPhone, faLock, faWrench, faCircleCheck, faClock, faChartSimple, faDatabase, faGear, faComments, faUserGroup } from "@fortawesome/free-solid-svg-icons";
+library.add(faMagnifyingGlass, faPhone, faLock, faWrench, faCircleCheck, faClock, faChartSimple, faDatabase, faGear, faComments, faUserGroup);
 
 // const getThemeColor = async () => {
 //     const response = await axios.get('/api/settings?key=theme_color');
@@ -38,11 +50,15 @@ createInertiaApp({
     setup({ el, App, props, plugin }) {
         const app = createApp({ render: () => h(App, props) });
         app.use(plugin);
-        app.config.globalProperties.$themeColor = "#E4B521";
+        app.component('Link', Link);
+        app.config.globalProperties.$themeColor = "#DD9E36";
         app.config.globalProperties.$appName = "Vintage";
+        app.config.globalProperties.$route = route;
         app.provide('baseUrl', 'https://lovecar.autos/api');
         app.component("font-awesome-icon", FontAwesomeIcon);
-        app.use(ZiggyVue)
+        app.use(Toast);
+        app.use(ref);
+        app.use(ZiggyVue);
         app.mount(el);
     },
 })
