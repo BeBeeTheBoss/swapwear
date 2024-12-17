@@ -21,9 +21,11 @@
         "@inertiajs/inertia": "^0.11.1",
         "@inertiajs/inertia-vue3": "^0.6.0",
         "@inertiajs/vue3": "^2.0.0",
+        "@mdi/font": "^7.4.47",
         "@vitejs/plugin-vue": "^4.0.0",
         "bootstrap": "^5.3.3",
         "vue-toastification": "^2.0.0-rc.5",
+        "vuetify": "^3.7.5",
         "ziggy": "^2.4.0",
         "ziggy-js": "^2.4.1"
     }

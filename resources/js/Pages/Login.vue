@@ -1,6 +1,6 @@
 <template>
     <div class="body">
-        <div class="container flex justify-center items-center" style="height:100vh">
+        <div class="container flex justify-center items-center" style="min-height:100vh">
             <form class="form shadow">
                 <div class="h4 mb-4 fw-bold text-center" :style="{ color: $themeColor }">
                     {{ $appName }} Dashboard
@@ -92,6 +92,7 @@ onMounted(() => {
 })
 
 onUpdated(() => {
+
 
     if (page.props.flash.success) {
         toast.success(page.props.flash.success);

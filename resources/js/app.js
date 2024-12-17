@@ -24,22 +24,23 @@ import {route} from 'ziggy-js';
 import { library } from "@fortawesome/fontawesome-svg-core";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 
-import { faMagnifyingGlass, faPhone, faLock, faWrench, faCircleCheck, faClock, faChartSimple, faDatabase, faGear, faComments, faUserGroup } from "@fortawesome/free-solid-svg-icons";
-library.add(faMagnifyingGlass, faPhone, faLock, faWrench, faCircleCheck, faClock, faChartSimple, faDatabase, faGear, faComments, faUserGroup);
+import { faMagnifyingGlass, faPhone, faLock, faWrench, faCircleCheck, faClock, faChartSimple, faDatabase, faGear, faComments, faUserGroup,faPlus,faCircleXmark } from "@fortawesome/free-solid-svg-icons";
+library.add(faMagnifyingGlass, faPhone, faLock, faWrench, faCircleCheck, faClock, faChartSimple, faDatabase, faGear, faComments, faUserGroup,faPlus,faCircleXmark);
 
-// const getThemeColor = async () => {
-//     const response = await axios.get('/api/settings?key=theme_color');
+// Vuetify
+import 'vuetify/styles'
+import { createVuetify } from 'vuetify'
+import * as components from 'vuetify/components'
+import * as directives from 'vuetify/directives'
+import '@mdi/font/css/materialdesignicons.css';
 
-//     if(response.data.status != 200){
-//         console.log(response.data.message);
-//     }
-
-//     localStorage.setItem('themeColor',response.data.data[0].value);
-//     return themeColor;
-// }
-
-// //theme color
-// const themeColor = localStorage.getItem('themeColor') ?? getThemeColor();
+const vuetify = createVuetify({
+  components,
+  directives,
+  icons: {
+    defaultSet: 'mdi', // Default is Material Design Icons
+  },
+})
 
 
 createInertiaApp({
@@ -59,6 +60,7 @@ createInertiaApp({
         app.use(Toast);
         app.use(ref);
         app.use(ZiggyVue);
+        app.use(vuetify);
         app.mount(el);
     },
 })

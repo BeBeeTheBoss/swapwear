@@ -1,11 +1,11 @@
 <template>
-    <v-container>
+    <div>
         <Header/>
         <div class="container">
             <slot/>
         </div>
         <Navbar/>
-    </v-container>
+    </div>
 </template>
 
 <script setup>

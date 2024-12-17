@@ -8,7 +8,7 @@
         </button>
         </Link>
         <Link :href="$route('resources')">
-        <button class="button" :class="route().current('resources') || route().current('resources.*') ? 'click' : ''" style="position: relative">
+        <button class="button" :class="route().current('resources') || route().current('main-categories.*') ? 'click' : ''" style="position: relative">
             <font-awesome-icon icon="fa-solid fa-database" />
             <!-- <div v-if="route().current('resources') || route().current('resources.*')" style="position:absolute;bottom:3px;width:15px;height:4px;background-color:blue;border-radius:20px"></div> -->
         </button>
@@ -55,8 +55,8 @@
 }
 
 .click {
-    transform:scale(1.3);
-    color:black
+    /* transform:scale(1.3); */
+    color:rgb(71, 71, 56)
 }
 
 .icon {

@@ -1,6 +1,6 @@
 <template>
     <Layout>
-        <div class="container mt-8 h4">
+        <div class="container mt-8 h5">
             Dashboard
         </div>
         <div class="container rounded-lg pt-3" style="height:90vh">
