@@ -23,6 +23,7 @@
                     </Link>
                 </div>
                 <div class="col-lg-3 col-md-4 col-sm-6 col-6 ">
+                    <Link :href="route('sub-categories.get')">
                     <div class="border bg-blur shadow-sm p-2 rounded-lg cursor-pointer">
                         <div class="flex items-center">
 
@@ -35,6 +36,7 @@
                         </div>
                         <div class="fw-bold pt-2 ps-1">Sub Categories</div>
                     </div>
+                    </Link>
                 </div>
             </div>
         </div>
@@ -45,6 +47,7 @@
 import Layout from '../Layouts/Layout.vue';
 import Button from '../Components/Button.vue';
 import { ref } from 'vue';
+import { route } from 'ziggy-js';
 
 const headers = ['Resources'];
 
