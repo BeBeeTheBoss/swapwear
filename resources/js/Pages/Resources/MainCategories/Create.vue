@@ -2,6 +2,9 @@
     <Layout>
         <v-breadcrumbs class="my-5" :items="headers"></v-breadcrumbs>
         <div class="container">
+            <span class="h5 cursor-pointer" @click="goBack">
+                <font-awesome-icon icon="fa-solid fa-chevron-left" /> Back
+            </span>
             <div class="row flex justify-center items-center" style="height:60vh">
                 <div class="col-lg-6 col-md-8 col-sm-12 col-12 shadow bg-blur rounded-lg p-3">
                     <div class="text-center text-h5">
@@ -46,6 +49,10 @@ const form = useForm({
 const toast = useToast();
 const previewImageUrl = ref(null);
 const loading = ref(false);
+
+const goBack = () => {
+    window.history.back();
+}
 
 const clearImage = () => {
     previewImageUrl.value = null;

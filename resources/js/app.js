@@ -24,8 +24,8 @@ import {route} from 'ziggy-js';
 import { library } from "@fortawesome/fontawesome-svg-core";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 
-import { faMagnifyingGlass, faPhone, faLock, faWrench, faCircleCheck, faClock, faChartSimple, faDatabase, faGear, faComments, faUserGroup,faPlus,faCircleXmark } from "@fortawesome/free-solid-svg-icons";
-library.add(faMagnifyingGlass, faPhone, faLock, faWrench, faCircleCheck, faClock, faChartSimple, faDatabase, faGear, faComments, faUserGroup,faPlus,faCircleXmark);
+import { faMagnifyingGlass, faPhone, faLock, faWrench, faCircleCheck, faClock, faChartSimple, faDatabase, faGear, faComments, faUserGroup,faPlus,faCircleXmark,faChevronLeft } from "@fortawesome/free-solid-svg-icons";
+library.add(faMagnifyingGlass, faPhone, faLock, faWrench, faCircleCheck, faClock, faChartSimple, faDatabase, faGear, faComments, faUserGroup,faPlus,faCircleXmark,faChevronLeft);
 
 // Vuetify
 import 'vuetify/styles'

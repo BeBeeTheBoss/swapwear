@@ -1,6 +1,11 @@
 <template>
     <layout>
         <v-breadcrumbs class="my-5" :items="headers"></v-breadcrumbs>
+        <div class="container">
+            <span class="h5 cursor-pointer" @click="goBack">
+                <font-awesome-icon icon="fa-solid fa-chevron-left" /> Back
+            </span>
+        </div>
         <div class="container mt-8 flex justify-between items-center">
             <div class="h5">
                 Main Categories
@@ -49,16 +54,20 @@ const props = defineProps({
     main_categories: Array
 })
 
+const goBack = () => {
+    window.history.back();
+}
+
 onMounted(() => {
 
 
-    if (page.props.flash.success) {
-        toast.success(page.props.flash.success);
-        page.props.flash.success = null;
-    } else if (page.props.flash.error) {
-        toast.error(page.props.flash.error);
-        page.props.flash.error = null;
-    }
+    // if (page.props.flash.success) {
+    //     toast.success(page.props.flash.success);
+    //     page.props.flash.success = null;
+    // } else if (page.props.flash.error) {
+    //     toast.error(page.props.flash.error);
+    //     page.props.flash.error = null;
+    // }
 
 })
 

@@ -2,6 +2,9 @@
     <Layout>
         <v-breadcrumbs class="my-5" :items="headers"></v-breadcrumbs>
         <div class="container">
+            <span class="h5 cursor-pointer" @click="goBack">
+                <font-awesome-icon icon="fa-solid fa-chevron-left" /> Back
+            </span>
             <div class="row flex justify-center items-center" style="height:60vh">
                 <div class="col-lg-6 col-md-8 col-sm-12 col-12 shadow bg-blur rounded-lg p-3">
                     <div class="text-center text-h5">
@@ -41,6 +44,7 @@ import { ref } from 'vue';
 import { useForm } from '@inertiajs/inertia-vue3';
 import { router } from '@inertiajs/vue3';
 import { useToast } from 'vue-toastification';
+import { route } from 'ziggy-js';
 
 const headers = ['Resources', 'Main Categories', 'Edit'];
 
@@ -62,6 +66,10 @@ const loading2 = ref(false);
 const clearImage = () => {
     previewImageUrl.value = null;
     form.icon = null;
+}
+
+const goBack = () => {
+    window.history.back();
 }
 
 const onFileChange = (event) => {
