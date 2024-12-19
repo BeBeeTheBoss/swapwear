@@ -3,7 +3,7 @@
         <div class="container p-2 flex items-center justify-between text-white">
             <brand class="h5 col-6">
                 <div class="flex items-center">
-                    <img src="../../../../public/images/logo.png" class="me-2" alt="" style="width:19px;height:19px">
+                    <img src="../../../../public/images/bag.png" class="me-2" alt="" style="width:19px;height:19px">
                     Vintage
                 </div>
             </brand>
