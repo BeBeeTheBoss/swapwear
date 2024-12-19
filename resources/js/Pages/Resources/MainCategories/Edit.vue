@@ -7,8 +7,8 @@
                 <font-awesome-icon icon="fa-solid fa-chevron-left" /> Back
             </span>
             </Link>
-            <div class="row flex justify-center items-center" style="height:60vh">
-                <div class="col-lg-6 col-md-8 col-sm-12 col-12 shadow bg-blur rounded-lg p-3">
+            <div class="row flex justify-center items-center" style="min-height:60vh">
+                <div class="col-lg-6 col-md-8 col-sm-12 col-12 shadow bg-blur rounded-lg p-3 mt-3 mb-12">
                     <div class="text-center text-h5">
                         Update main category
                     </div>

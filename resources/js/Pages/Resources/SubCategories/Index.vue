@@ -33,7 +33,7 @@
                             <div class="col-lg-2 col-md-4 col-sm-6 col-6 cursor-pointer my-2"
                                 v-for="sub_category in item.sub_categories" :key="sub_category">
                                 <Link :href="route('sub-categories.edit', { id: sub_category.id })">
-                                <div class="shadow bg-blur" style=" padding: 10px; border-radius: 6px;">
+                                <div class="shadow-sm" style="border: rgba(255, 255, 255, 0.429) solid 1px;padding: 10px; border-radius: 6px;">
                                     <div class="flex">
                                         <img :src="sub_category.icon" class="me-2"
                                             style="width:20px;height:20px;object-fit:cover;object-position:center">
