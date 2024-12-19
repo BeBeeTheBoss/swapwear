@@ -2,7 +2,7 @@
     <Layout>
         <v-breadcrumbs class="my-5" :items="headers"></v-breadcrumbs>
         <div class="container">
-            <Link :href="route('main-categories.get')">
+            <Link :href="route('sub-categories.get')">
             <span class="h5 cursor-pointer">
                 <font-awesome-icon icon="fa-solid fa-chevron-left" /> Back
             </span>
@@ -10,9 +10,11 @@
             <div class="row flex justify-center items-center" style="height:60vh">
                 <div class="col-lg-6 col-md-8 col-sm-12 col-12 shadow bg-blur rounded-lg p-3">
                     <div class="text-center text-h5">
-                        Update main category
+                        Create new sub category
                     </div>
                     <div class="form mt-8">
+                        <v-select label="Select" :items="props.main_categories" item-title="name" item-value="id"
+                            v-model="form.main_category_id" variant="outlined"></v-select>
                         <v-text-field label="Name" v-model="form.name" variant="outlined"></v-text-field>
                         <v-file-input prepend-icon="mdi-image-outline" clearable label="Choose icon"
                             @change="onFileChange" @input="form.icon = $event.target.files[0]" @click:clear="clearImage"
@@ -29,11 +31,8 @@
                             </div>
                         </div>
                     </div>
-                    <div class="flex justify-between">
-                        <Button text="Update" class="py-3 mt-3 mb-2" @click="submit" :loading="loading"
-                            style="width:49%" />
-                        <Button text="Delete" class="py-3 mt-3 mb-2" @click="deleteCategory" :loading="loading2"
-                            style="width:49%;background-color:#C23238" />
+                    <div>
+                        <Button text="Create" class="w-100 py-3 mt-3 mb-2" @click="submit" :loading="loading" />
                     </div>
                 </div>
             </div>
@@ -46,34 +45,31 @@ import Layout from '../../Layouts/Layout.vue';
 import Button from '../../Components/Button.vue';
 import { ref } from 'vue';
 import { useForm } from '@inertiajs/inertia-vue3';
-import { router } from '@inertiajs/vue3';
 import { useToast } from 'vue-toastification';
-import { route } from 'ziggy-js';
 
-const headers = ['Resources', 'Main Categories', 'Edit'];
+const headers = ['Resources', 'Sub Categories', 'Create'];
 
 const props = defineProps({
-    main_category: Object
+    main_categories: Array
 })
 
 const form = useForm({
-    id: props.main_category.data.id,
-    name: props.main_category.data.name,
-    icon: props.main_category.data.icon,
+    main_category_id: null,
+    name: '',
+    icon: '',
 })
 
 const toast = useToast();
-const previewImageUrl = ref(props.main_category.data.icon);
+const previewImageUrl = ref(null);
 const loading = ref(false);
-const loading2 = ref(false);
+
+const goBack = () => {
+    window.history.back();
+}
 
 const clearImage = () => {
     previewImageUrl.value = null;
     form.icon = null;
-}
-
-const goBack = () => {
-    window.history.back();
 }
 
 const onFileChange = (event) => {
@@ -82,15 +78,16 @@ const onFileChange = (event) => {
 }
 
 const submit = () => {
+
     loading.value = true;
 
-    if (form.name == '' || form.icon == '' || form.icon == null) {
+    if (form.name == '' || form.icon == '' || form.icon == null || form.main_category_id == null) {
         toast.info('Please input all fields');
         loading.value = false;
         return;
     }
 
-    form.post(route('main-categories.update'), {
+    form.post(route('sub-categories.store'), {
         onSuccess: () => {
             loading.value = false;
         },
@@ -100,23 +97,13 @@ const submit = () => {
     });
 }
 
-const deleteCategory = () => {
-    router.delete(route('main-categories.delete', { id: props.main_category.data.id }), {
-        onSuccess: () => {
-            loading2.value = false;
-        },
-        onError: () => {
-            loading2.value = false;
-        }
-    })
-}
-
 </script>
 
 <style scoped>
 .bg-blur {
     background-color: rgba(255, 255, 255, 0.14);
     backdrop-filter: blur(10px);
+    /* color:black; */
 }
 
 .input {

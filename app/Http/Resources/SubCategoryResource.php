@@ -5,7 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class MainCategoryResource extends JsonResource
+class SubCategoryResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -14,16 +14,14 @@ class MainCategoryResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $data =  [
+        return [
             'id' => $this->id,
+            'main_category_id' => $this->main_category_id,
             'name' => $this->name,
             'icon' => url('storage/icons/' . $this->icon),
+            'purchase_count' => $this->purchase_count,
             'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
-            'sub_categories' => SubCategoryResource::collection($this->whenLoaded('sub_categories'))
+            'updated_at' => $this->updated_at
         ];
-
-        return $data;
-
     }
 }

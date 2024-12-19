@@ -41,6 +41,11 @@ Route::middleware(['auth.check'])->group(function () {
     //sub categories
     Route::group(['prefix' => 'sub-categories','controller' => SubCategoryController::class, 'as' => 'sub-categories.'], function () {
         Route::get('/','index')->name('get');
+        Route::get('/create','create')->name('create');
+        Route::post('/','store')->name('store');
+        Route::get('/edit','edit')->name('edit');
+        route::post('/update','update')->name('update');
+        Route::delete('/','destroy')->name('delete');
     });
 
 });

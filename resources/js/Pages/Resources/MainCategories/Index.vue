@@ -2,9 +2,11 @@
     <layout>
         <v-breadcrumbs class="my-5" :items="headers"></v-breadcrumbs>
         <div class="container">
-            <span class="h5 cursor-pointer" @click="goBack">
+            <Link :href="route('resources')">
+            <span class="h5 cursor-pointer">
                 <font-awesome-icon icon="fa-solid fa-chevron-left" /> Back
             </span>
+            </Link>
         </div>
         <div class="container mt-8 flex justify-between items-center">
             <div class="h5">
@@ -16,11 +18,11 @@
                 </Link>
             </div>
         </div>
-        <div class="container">
+        <div class="container mb-20">
             <div class="row mt-6">
-                <div class="col-lg-3 col-md-4 col-sm-6 col-6 cursor-pointer"
+                <div class="col-lg-3 col-md-4 col-sm-6 col-6 cursor-pointer my-2"
                     v-for="main_category in props.main_categories.data" :key="main_category">
-                    <Link :href="route('main-categories.edit', {id: main_category.id})">
+                    <Link :href="route('main-categories.edit', { id: main_category.id })">
                     <div class="border shadow-sm p-2 bg-blur rounded-lg">
                         <div class="flex items-center">
                             <div>
@@ -72,8 +74,6 @@ onMounted(() => {
 })
 
 onUpdated(() => {
-
-    console.log(page.props.flash);
 
 
 
