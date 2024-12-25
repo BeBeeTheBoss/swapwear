@@ -11,9 +11,9 @@ class MainCategoryController extends Controller
 {
     public function __construct(protected MainCategoryService $service) {}
 
-    public function index(Request $request){
+    public function index(Request $request,$id = null){
 
-        $main_categories = $this->service->get($request);
+        $main_categories = $this->service->get($request,$id);
         $main_categories = MainCategoryResource::collection($main_categories);
 
         return sendResponse($main_categories,200);

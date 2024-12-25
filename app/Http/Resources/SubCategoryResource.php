@@ -17,6 +17,7 @@ class SubCategoryResource extends JsonResource
         return [
             'id' => $this->id,
             'main_category_id' => $this->main_category_id,
+            'main_category' => new MainCategoryResource($this->whenLoaded('main_category')),
             'name' => $this->name,
             'icon' => url('storage/icons/' . $this->icon),
             'purchase_count' => $this->purchase_count,

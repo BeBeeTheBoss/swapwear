@@ -27,7 +27,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     //main categories
     Route::group(['prefix' => '/main-categories','controller' => MainCategoryController::class], function () {
-        Route::get('/','index');
+        Route::get('/{id?}','index');
         Route::post('/','store');
         Route::post('/update','update');
         Route::delete('/','destroy');
@@ -35,7 +35,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     //sub categories
     Route::group(['prefix' => '/sub-categories','controller' => SubCategoryController::class], function () {
-        Route::get('/','index');
+        Route::get('/{id?}','index');
         Route::post('/','store');
         Route::post('/update','update');
         Route::delete('/','destroy');

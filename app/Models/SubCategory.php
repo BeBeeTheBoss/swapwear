@@ -11,7 +11,7 @@ class SubCategory extends Model
 
     protected $fillable = ['main_category_id', 'name', 'icon','purchase_count'];
 
-    public function mainCategory()
+    public function main_category()
     {
         return $this->belongsTo(MainCategory::class);
     }

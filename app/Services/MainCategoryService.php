@@ -11,10 +11,12 @@ class MainCategoryService
 
     public function __construct(protected MainCategory $model) {}
 
-    public function get($request)
+    public function get($request,$id = null)
     {
-        $main_categories = $this->model->when($request->query, function ($query) use ($request) {
-            if($request->query('query') == 'sub_categories'){
+        $main_categories = $this->model->when($id,function($query) use($id){
+            $query->where('id', $id);
+        })->when($request->query, function ($query) use ($request) {
+            if($request->query('with') == 'sub-categories'){
                 $query->with('sub_categories');
             }
         })->get();

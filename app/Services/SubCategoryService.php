@@ -11,9 +11,15 @@ class SubCategoryService
     public function __construct(protected SubCategory $model) {}
 
 
-    public function get()
+    public function get($request,$id = null)
     {
-        return $this->model->get();
+        return $this->model->when($id,function($query) use($id){
+            $query->where('id', $id);
+        })->when($request->query, function ($query) use ($request) {
+            if($request->query('with') == 'main-category'){
+                $query->with('main_category');
+            }
+        })->get();
     }
 
     public function create($request)

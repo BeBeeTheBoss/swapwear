@@ -12,8 +12,9 @@ class SubCategoryController extends Controller
 {
     public function __construct(protected SubCategoryService $service) {}
 
-    public function index(){
-        $data = $this->service->get();
+
+    public function index(Request $request,$id = null){
+        $data = $this->service->get($request,$id);
         return sendResponse(SubCategoryResource::collection($data),200);
     }
 
