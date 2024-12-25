@@ -1,10 +1,10 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Api\SubCategoryController;
 use App\Http\Controllers\Api\MainCategoryController;
+use App\Http\Controllers\Api\SellingProductController;
 
 /*
 |--------------------------------------------------------------------------
@@ -35,6 +35,14 @@ Route::middleware('auth:sanctum')->group(function () {
 
     //sub categories
     Route::group(['prefix' => '/sub-categories','controller' => SubCategoryController::class], function () {
+        Route::get('/{id?}','index');
+        Route::post('/','store');
+        Route::post('/update','update');
+        Route::delete('/','destroy');
+    });
+
+    //selling products
+    Route::group(['prefix' => '/selling-products','controller' => SellingProductController::class], function () {
         Route::get('/{id?}','index');
         Route::post('/','store');
         Route::post('/update','update');

@@ -39,6 +39,12 @@ class User extends Authenticatable
         return $this->hasMany(SocialMediaProfileLink::class);
     }
 
+    //connect with selling products
+    public function selling_products()
+    {
+        return $this->hasMany(SellingProduct::class);
+    }
+
     /**
      * The attributes that should be hidden for serialization.
      *
