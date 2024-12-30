@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Api\SubCategoryController;
 use App\Http\Controllers\Api\MainCategoryController;
+use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\SellingProductController;
 
 /*
@@ -48,5 +49,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/update','update');
         Route::delete('/','destroy');
     });
+
+    Route::group(['prefix' => '/orders','controller' => OrderController::class],function(){
+        Route::get('/','index');
+        Route::post('/','store');
+        Route::post('/update','update');
+        Route::delete('/','destroy');
+    });
+
 
 });
