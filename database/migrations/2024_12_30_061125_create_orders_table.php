@@ -21,8 +21,10 @@ return new class extends Migration
             $table->unsignedBigInteger('total_price')->default(0);
             $table->unsignedBigInteger('payment_id')->nullable();
             $table->foreign('payment_id')->references('id')->on('payments')->onDelete('set null');
-            $table->string('status')->default('pending');
+            $table->string('payment_screenshot')->nullable();
+            $table->string('status')->default('Order-Pending'); //Order-Accepted,Order-Rejected,Payment-Pending,Payment-Accepted,Payment-Rejected,On-Delivery,Delivered
             $table->longText('note')->nullable();
+            $table->longText('reject_note')->nullable();
             $table->timestamps();
         });
     }

@@ -53,8 +53,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::group(['prefix' => '/orders','controller' => OrderController::class],function(){
         Route::get('/','index');
         Route::post('/','store');
-        Route::post('/update','update');
-        Route::delete('/','destroy');
+        Route::post('/refund','refund');
+        Route::post('/accept','accept');
+        Route::post('/make-payment','makePayment');
+        Route::post('/reject','reject');
     });
 
 

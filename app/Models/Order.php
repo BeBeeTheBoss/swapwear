@@ -17,8 +17,10 @@ class Order extends Model
         'quantity',
         'total_price',
         'payment_id',
+        'payment_screenshot',
         'status',
-        'note'
+        'note',
+        'reject_note'
     ];
 
     //connect with user
