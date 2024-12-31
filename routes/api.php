@@ -56,7 +56,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/refund','refund');
         Route::post('/accept','accept');
         Route::post('/make-payment','makePayment');
+        Route::post('/accept-payment','acceptPayment');
         Route::post('/reject','reject');
+        Route::post('/delivered','delivered');
+        Route::post('/received','received');
     });
 
 

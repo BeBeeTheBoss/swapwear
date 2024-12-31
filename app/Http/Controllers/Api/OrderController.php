@@ -54,7 +54,7 @@ class OrderController extends Controller
 
         $order = $this->model->create($this->toArray($request, $selling_product));
 
-        return sendResponse(new OrderResource($order), 201, 'Order created successfully!');
+        return sendResponse(new OrderResource($order), 201, 'Order created!');
     }
 
     public function refund(Request $request)
@@ -70,13 +70,13 @@ class OrderController extends Controller
             return sendResponse(null, 404, 'Order not found');
         }
 
-        if ($order->status != 'pending') {
-            return sendResponse(null, 401, 'Seller accepted this order!, you can not refund this order');
+        if ($order->status != 'order-pending' || $order->status != 'on-hold') {
+            return sendResponse(null, 405, 'Seller accepted this order!, you can not refund this order now');
         }
 
         $order->delete();
 
-        return sendResponse(null, 200, 'Order refunded successfully!');
+        return sendResponse(null, 200, 'Order refunded!');
     }
 
     public function accept(Request $request)
@@ -90,11 +90,25 @@ class OrderController extends Controller
         if (!$order) {
             return sendResponse(null, 404, 'Order not found');
         }
-
-        $order->status = 'accepted';
+        $order->status = 'order-accepted';
         $order->save();
 
-        return sendResponse(new OrderResource($order), 200, 'Order accepted successfully!');
+        $selling_product = SellingProduct::find($order->selling_product_id);
+        if (!$selling_product) {
+            return sendResponse(null, 404, 'Selling product not found');
+        }
+
+        if ($selling_product->quantity == 1) {
+
+            //hold other pending orders
+            $this->model->where('selling_product_id', $selling_product->id)->where('status', 'pending')->update(['status' => 'on-hold']);
+
+            //hold selling product
+            $selling_product->status = 'on-hold';
+            $selling_product->save();
+        }
+
+        return sendResponse(new OrderResource($order), 200, 'Order accepted!');
     }
 
     public function makePayment(Request $request)
@@ -118,17 +132,97 @@ class OrderController extends Controller
             $order->payment_screenshot = $imageName;
         }
 
-        $order->status = 'paid';
+        $order->status = 'payment-pending';
         $order->note = $request->note ?? null;
         $order->save();
 
-        return sendResponse(new OrderResource($order), 200, 'Order paid successfully!');
+        return sendResponse(new OrderResource($order), 200, 'Order paid!');
     }
 
-    public function reject(Request $request){
+    public function acceptPayment(Request $request){
+        $request->validate([
+            'id' => 'required'
+        ]);
+
+        $order = $this->model->find($request->id);
+        if (!$order) {
+            return sendResponse(null, 404, 'Order not found');
+        }
+
+        $order->status = 'payment-accepted';
+        $order->save();
+
+        return sendResponse(new OrderResource($order), 200, 'Payment accepted!');
+    }
+
+    public function delivered(Request $request){
+        $request->validate([
+            'id' => 'required'
+        ]);
+
+        $order = $this->model->find($request->id);
+        if (!$order) {
+            return sendResponse(null, 404, 'Order not found');
+        }
+
+        $order->status = 'delivered';
+        $order->save();
+    }
+
+    public function received(Request $request){
+        $request->validate([
+            'id' => 'required'
+        ]);
+
+        $order = $this->model->find($request->id);
+        if (!$order) {
+            return sendResponse(null, 404, 'Order not found');
+        }
+
+        $order->status = 'received';
+        $order->save();
+
+        $selling_product = SellingProduct::find($order->selling_product_id);
+        if ($selling_product->quantity == 1) {
+
+            //reject other holding orders
+            $this->model->where('selling_product_id', $selling_product->id)->where('status', 'pending')->update(['status' => 'order-rejected', 'reject_note' => 'Product sold out!']);
+
+            //set status sold out selling product
+            $selling_product->status = 'sold-out';
+            $selling_product->save();
+        }else{
+
+            $selling_product->product -= 1;
+            $selling_product->save();
+        }
+
+        return sendResponse(new OrderResource($order), 200, 'Order received!');
+    }
+
+    public function reject(Request $request)
+    {
         $request->validate([
             'id' => 'required',
         ]);
+
+        $order = $this->model->find($request->id);
+        if (!$order) {
+            return sendResponse(null, 404, 'Order not found');
+        }
+
+        $order->status = $order->status == 'payment-pending' ? 'payment-rejected' : 'order-rejected';
+        $order->reject_note = $request->reject_note ?? null;
+
+        if($request->file('payment_return_screenshot')) {
+            $imageName = storeImage($request->file('payment_return_screenshot'), '/payments/'); //store image to destination folder
+            $order->payment_return_screenshot = $imageName;
+        }
+
+        $order->save();
+
+        return sendResponse(new OrderResource($order), 200, 'Order rejected!');
+
     }
 
     private function toArray($request, $selling_product)
@@ -139,7 +233,8 @@ class OrderController extends Controller
             'selling_product_id' => $request->selling_product_id,
             'seller_id' => $selling_product->user_id,
             'quantity' => $request->quantity,
-            'total_price' => $request->quantity * $selling_product->price
+            'total_price' => $request->quantity * $selling_product->price,
+            'status' => $selling_product->status
         ];
     }
 }
