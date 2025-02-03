@@ -76,6 +76,9 @@ class OrderController extends Controller
 
         $order->delete();
 
+        //back to pending status for on-hold orders
+        $this->model->where('selling_product_id', $order->selling_product_id)->where('status', 'on-hold')->update(['status' => 'order-pending']);
+
         return sendResponse(null, 200, 'Order refunded!');
     }
 
@@ -90,18 +93,22 @@ class OrderController extends Controller
         if (!$order) {
             return sendResponse(null, 404, 'Order not found');
         }
-        $order->status = 'order-accepted';
-        $order->save();
 
         $selling_product = SellingProduct::find($order->selling_product_id);
         if (!$selling_product) {
             return sendResponse(null, 404, 'Selling product not found');
         }
 
-        if ($selling_product->quantity == 1) {
+        if($this->getOngoingOrdersCount($selling_product) == $selling_product->quantity) {
+            return sendResponse(null, 405, 'All orders are accepted!');
+        }
 
+        $order->status = 'order-accepted';
+        $order->save();
+
+        if($this->getOngoingOrdersCount($selling_product) + 1 == $selling_product->quantity) {
             //hold other pending orders
-            $this->model->where('selling_product_id', $selling_product->id)->where('status', 'pending')->update(['status' => 'on-hold']);
+            $this->model->where('selling_product_id', $selling_product->id)->where('status', 'order-pending')->update(['status' => 'on-hold']);
 
             //hold selling product
             $selling_product->status = 'on-hold';
@@ -139,7 +146,8 @@ class OrderController extends Controller
         return sendResponse(new OrderResource($order), 200, 'Order paid!');
     }
 
-    public function acceptPayment(Request $request){
+    public function acceptPayment(Request $request)
+    {
         $request->validate([
             'id' => 'required'
         ]);
@@ -155,7 +163,8 @@ class OrderController extends Controller
         return sendResponse(new OrderResource($order), 200, 'Payment accepted!');
     }
 
-    public function delivered(Request $request){
+    public function delivered(Request $request)
+    {
         $request->validate([
             'id' => 'required'
         ]);
@@ -169,7 +178,8 @@ class OrderController extends Controller
         $order->save();
     }
 
-    public function received(Request $request){
+    public function received(Request $request)
+    {
         $request->validate([
             'id' => 'required'
         ]);
@@ -186,12 +196,12 @@ class OrderController extends Controller
         if ($selling_product->quantity == 1) {
 
             //reject other holding orders
-            $this->model->where('selling_product_id', $selling_product->id)->where('status', 'pending')->update(['status' => 'order-rejected', 'reject_note' => 'Product sold out!']);
+            $this->model->where('selling_product_id', $selling_product->id)->where('status', 'order-pending')->update(['status' => 'order-rejected', 'reject_note' => 'Product sold out!']);
 
             //set status sold out selling product
             $selling_product->status = 'sold-out';
             $selling_product->save();
-        }else{
+        } else {
 
             $selling_product->product -= 1;
             $selling_product->save();
@@ -214,15 +224,28 @@ class OrderController extends Controller
         $order->status = $order->status == 'payment-pending' ? 'payment-rejected' : 'order-rejected';
         $order->reject_note = $request->reject_note ?? null;
 
-        if($request->file('payment_return_screenshot')) {
+        if ($request->file('payment_return_screenshot')) {
             $imageName = storeImage($request->file('payment_return_screenshot'), '/payments/'); //store image to destination folder
             $order->payment_return_screenshot = $imageName;
         }
 
+        //back to pending status for on-hold orders
+        $this->model->where('selling_product_id', $order->selling_product_id)->where('status', 'on-hold')->update(['status' => 'order-pending']);
+
         $order->save();
 
         return sendResponse(new OrderResource($order), 200, 'Order rejected!');
+    }
 
+    private function getOngoingOrdersCount($selling_product)
+    {
+        $excludedStatuses = ['order-pending', 'on-hold', 'order-rejected', 'payment-rejected'];
+        $ongoingOrdersCount = $this->model
+            ->where('selling_product_id', $selling_product->id)
+            ->whereNotIn('status', $excludedStatuses)
+            ->count();
+
+        return $ongoingOrdersCount;
     }
 
     private function toArray($request, $selling_product)
