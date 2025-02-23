@@ -52,6 +52,10 @@ class OrderController extends Controller
             return sendResponse(null, 404, 'Selling product not found');
         }
 
+        if($selling_product->quantity < $request->quantity){
+            return sendResponse(null, 404, 'Please order in available quantity');
+        }
+
         $order = $this->model->create($this->toArray($request, $selling_product));
 
         return sendResponse(new OrderResource($order), 201, 'Order created!');
@@ -103,10 +107,14 @@ class OrderController extends Controller
             return sendResponse(null, 405, 'All orders are accepted!');
         }
 
+        if($this->getOngoingOrdersCount($selling_product) + $order->quantity > $selling_product->quantity){
+            return sendResponse(null,405,'Only'.$selling_product->quantity - $this->getOngoingOrdersCount($selling_product).' in stock!');
+        }
+
         $order->status = 'order-accepted';
         $order->save();
 
-        if($this->getOngoingOrdersCount($selling_product) + 1 == $selling_product->quantity) {
+        if($this->getOngoingOrdersCount($selling_product) + $order->quantity == $selling_product->quantity) {
             //hold other pending orders
             $this->model->where('selling_product_id', $selling_product->id)->where('status', 'order-pending')->update(['status' => 'on-hold']);
 
@@ -193,7 +201,7 @@ class OrderController extends Controller
         $order->save();
 
         $selling_product = SellingProduct::find($order->selling_product_id);
-        if ($selling_product->quantity == 1) {
+        if ($selling_product->quantity == $order->quantity) {
 
             //reject other holding orders
             $this->model->where('selling_product_id', $selling_product->id)->where('status', 'order-pending')->update(['status' => 'order-rejected', 'reject_note' => 'Product sold out!']);
@@ -203,7 +211,7 @@ class OrderController extends Controller
             $selling_product->save();
         } else {
 
-            $selling_product->product -= 1;
+            $selling_product->product -= $order->quantity;
             $selling_product->save();
         }
 
@@ -243,7 +251,7 @@ class OrderController extends Controller
         $ongoingOrdersCount = $this->model
             ->where('selling_product_id', $selling_product->id)
             ->whereNotIn('status', $excludedStatuses)
-            ->count();
+            ->sum('quantity');
 
         return $ongoingOrdersCount;
     }
@@ -257,7 +265,7 @@ class OrderController extends Controller
             'seller_id' => $selling_product->user_id,
             'quantity' => $request->quantity,
             'total_price' => $request->quantity * $selling_product->price,
-            'status' => $selling_product->status
+            'status' => 'order-pending'
         ];
     }
 }
