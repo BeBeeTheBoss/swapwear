@@ -29,6 +29,7 @@ class SellingProductResource extends JsonResource
             'status' => $this->selling,
             'is_active' => $this->is_active,
             'images' => SellingProductImageResource::collection($this->images),
+            'payments' => SellingProductPaymentResource::collection($this->payments),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at
         ];

@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Api;
 
 use Illuminate\Http\Request;
 use App\Models\SellingProduct;
+use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use App\Models\SellingProductPayment;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\SellingProductRequest;
 use App\Http\Resources\SellingProductResource;
@@ -30,7 +32,7 @@ class SellingProductController extends Controller
                     $query->with('user');
                 }
             }
-        })->get();
+        })->with('payments')->get();
 
         return sendResponse(SellingProductResource::collection($data), 200);
     }
@@ -38,20 +40,36 @@ class SellingProductController extends Controller
     public function store(SellingProductRequest $request)
     {
 
-        $selling_product = $this->model->create($request->images ? $this->toArray($request->except('images')) : $this->toArray($request));
+        DB::beginTransaction();
+        try{
+            $selling_product = $this->model->create($request->images ? $this->toArray($request->except('images')) : $this->toArray($request));
 
-        if ($request->file('images')) {
+            if ($request->file('images')) {
 
-            $imageFiles = $request->file('images');
-            foreach ($imageFiles as $imageFile) {
-                $imageName = storeImage($imageFile, '/product_images/'); //store image to destination folder
-                $selling_product->images()->create(['name' => $imageName]);
+                $imageFiles = $request->file('images');
+                foreach ($imageFiles as $imageFile) {
+                    $imageName = storeImage($imageFile, '/product_images/'); //store image to destination folder
+                    $selling_product->images()->create(['name' => $imageName]);
+                }
             }
+
+            foreach($request->payments as $payment){
+                SellingProductPayment::create([
+                    'selling_product_id' => $selling_product->id,
+                    'payment_id' => $payment['id']
+                ]);
+            }
+
+            $selling_product->save();
+
+            DB::commit();
+
+            return sendResponse(new SellingProductResource($selling_product), 200);
+        }catch(\Exception $e){
+            DB::rollBack();
+            return sendResponse(null, 500, $e->getMessage());
         }
 
-        $selling_product->save();
-
-        return sendResponse(new SellingProductResource($selling_product), 200);
     }
 
     public function update(SellingProductRequest $request)
@@ -89,6 +107,14 @@ class SellingProductController extends Controller
             }
         }
 
+        SellingProductPayment::where('selling_product_id', $selling_product->id)->delete();
+        foreach($request->payments as $payment_id){
+            SellingProductPayment::create([
+                'selling_product_id' => $selling_product->id,
+                'payment_id' => $payment_id
+            ]);
+        }
+
         return sendResponse(new SellingProductResource($selling_product), 200, 'Selling product updated success');
     }
 
@@ -108,6 +134,8 @@ class SellingProductController extends Controller
             Storage::delete('public/product_images/' . $din);
         }
         $deleted_image_names = $selling_product->images()->delete();
+
+        SellingProductPayment::where('selling_product_id', $selling_product->id)->delete();
 
         $selling_product->delete();
 

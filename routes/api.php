@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\PaymentController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Api\SubCategoryController;
@@ -60,6 +61,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/reject','reject');
         Route::post('/delivered','delivered');
         Route::post('/received','received');
+    });
+
+    Route::group(['prefix' => '/payments', 'controller' => PaymentController::class],function(){
+        Route::get('/','index');
+        Route::post('/','store');
+        Route::post('/update','update');
+        Route::delete('/','destroy');
     });
 
 

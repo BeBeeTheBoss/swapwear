@@ -21,6 +21,11 @@ class SellingProduct extends Model
         'is_active'
     ];
 
+    //connect with payments
+    public function payments(){
+        return $this->hasMany(SellingProductPayment::class);
+    }
+
     //connect with user
     public function user()
     {
