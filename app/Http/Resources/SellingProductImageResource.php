@@ -16,7 +16,7 @@ class SellingProductImageResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'name' => url($this->name)
+            'name' => url(path: "/storage/product_images/".$this->name)
         ];
     }
 }
