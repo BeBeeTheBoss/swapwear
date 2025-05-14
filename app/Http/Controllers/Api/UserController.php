@@ -19,7 +19,7 @@ class UserController extends Controller
         $data = $id ? $this->model->find($id) : $this->model
             ->when($request->name, function ($query) use ($request) {
                 $name = str_replace(' ', '', $request->name);
-                $query->whereRaw('REPLACE(LOWER(name), " ", "") LIKE ?', ['%' . strtolower($name) . '%']);
+                $query->whereRaw("REPLACE(LOWER(name), ' ', '') LIKE ?", ['%' . strtolower($name) . '%']);
             })->when($request->phone, function ($query) use ($request) {
                 $query->where('phone', $request->phone);
             })
@@ -33,7 +33,7 @@ class UserController extends Controller
             new UserResource($data);
         }else{
             if (count($data) == 0) {
-                return sendResponse(null, 404, 'User not found');
+                return sendResponse([], 404, 'User not found');
             }
             UserResource::collection($data);
         }
@@ -41,12 +41,10 @@ class UserController extends Controller
         return sendResponse($data, 200);
     }
 
-    public function update(Request $request, $id = null)
+    public function update(Request $request)
     {
 
-        info($request->all());
-
-        $user = $this->model->find($id);
+        $user = $this->model->find(Auth::user()->id);
         if (!$user) {
             return sendResponse(null, 404, 'User not found');
         }

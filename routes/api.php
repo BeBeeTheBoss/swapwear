@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\PaymentController;
+use App\Http\Controllers\Api\UserController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Api\SubCategoryController;
@@ -26,6 +27,13 @@ Route::controller(AuthController::class)->group(function () {
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
+
+    //user
+    Route::group(['prefix' => '/users','controller' => UserController::class], function () {
+        Route::get('/{id?}','index');
+        Route::post('/update','update');
+        Route::post('/update-profile','updatePfp');
+    });
 
     //main categories
     Route::group(['prefix' => '/main-categories','controller' => MainCategoryController::class], function () {
