@@ -32,6 +32,12 @@ class SellingProductController extends Controller
                     $query->with('user');
                 }
             }
+
+            if($request->query('sub-category-id')){
+                $query->where('sub_category_id', $request->query('sub-category-id'));
+            }
+
+
         })->with('payments')->get();
 
         return sendResponse(SellingProductResource::collection($data), 200);
