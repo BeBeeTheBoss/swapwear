@@ -38,6 +38,10 @@ class OrderController extends Controller
                         $query->with('user');
                     } else if ($relation == 'seller') {
                         $query->with('seller');
+                    }else if($relation == 'selling-product'){
+                        $query->with('selling_product',function($query){
+                            $query->with('payments');
+                        });
                     }
                 }
             })->get();

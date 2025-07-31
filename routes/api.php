@@ -59,6 +59,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/','destroy');
     });
 
+    //orders
     Route::group(['prefix' => '/orders','controller' => OrderController::class],function(){
         Route::get('/','index');
         Route::post('/','store');
@@ -71,6 +72,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/received','received');
     });
 
+    //payments
     Route::group(['prefix' => '/payments', 'controller' => PaymentController::class],function(){
         Route::get('/','index');
         Route::post('/','store');

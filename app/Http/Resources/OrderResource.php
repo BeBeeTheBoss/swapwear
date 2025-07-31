@@ -20,6 +20,7 @@ class OrderResource extends JsonResource
             'user_id' => $this->user_id,
             'user' => new UserResource($this->whenLoaded('user')),
             'selling_product_id' => $this->selling_product_id,
+            'selling_product' => new SellingProductResource($this->whenLoaded('selling_product')),
             'seller_id' => $this->seller_id,
             'seller' => new UserResource($this->whenLoaded('seller')),
             'quantity' => $this->quantity,
