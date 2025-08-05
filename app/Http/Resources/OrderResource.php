@@ -27,6 +27,7 @@ class OrderResource extends JsonResource
             'total_price' => $this->total_price,
             'payment_id' => $this->payment_id,
             // 'payment' => new UserResource($this->whenLoaded('payment')),
+            'payment_screenshot' => $this->payment_screenshot,
             'status' => $this->status,
             'note' => $this->note
         ];
