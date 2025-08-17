@@ -74,6 +74,18 @@ class AuthController extends Controller
 
         if ($request->login_method == 'phone') {
             $user = $this->loginWithPhoneNumber($request->phone, $request->password);
+        }else{
+
+            $request->validate([
+                'name' => 'required',
+                'oauth_id' => 'required',
+                'oauth_type' => 'required'
+            ]);
+
+            $user = $this->model->where('oauth_id',$request->oauth_id)->first();
+            if(!$user){
+                $user = $this->registerWithOauth($request);
+            }
         }
 
         if (!$user) {
@@ -132,6 +144,15 @@ class AuthController extends Controller
         Auth::loginUsingId($user->id);
 
         return redirect()->route('dashboard');
+    }
+
+    private function registerWithOauth($request){
+        return $this->model->create([
+            'name' => $request->name,
+            'oauth_id' => $request->oauth_id,
+            'oauth_type' => $request->oauth_type,
+            'oauth_image' => $request->oauth_image
+        ]);
     }
 
     private function loginWithPhoneNumber($phone, $password)
