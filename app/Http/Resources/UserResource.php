@@ -16,7 +16,7 @@ class UserResource extends JsonResource
     {
         $data = parent::toArray($request);
 
-        $data['image'] = $data['image'] != null ? url('storage/profile_images/' . $data['image']) : null;
+        $data['image'] = $data['image'] ? url('storage/profile_images/' . $data['image']) : null;
 
         return $data;
     }
