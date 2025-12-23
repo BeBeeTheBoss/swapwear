@@ -38,8 +38,8 @@ class OrderController extends Controller
                         $query->with('user');
                     } else if ($relation == 'seller') {
                         $query->with('seller');
-                    }else if($relation == 'selling-product'){
-                        $query->with('selling_product',function($query){
+                    } else if ($relation == 'selling-product') {
+                        $query->with('selling_product', function ($query) {
                             $query->with('payments');
                         });
                     }
@@ -56,7 +56,7 @@ class OrderController extends Controller
             return sendResponse(null, 404, 'Selling product not found');
         }
 
-        if($selling_product->quantity < $request->quantity){
+        if ($selling_product->quantity < $request->quantity) {
             return sendResponse(null, 404, 'Please order in available quantity');
         }
 
@@ -97,6 +97,7 @@ class OrderController extends Controller
             'id' => 'required'
         ]);
 
+
         $order = $this->model->find($request->id);
         if (!$order) {
             return sendResponse(null, 404, 'Order not found');
@@ -107,24 +108,19 @@ class OrderController extends Controller
             return sendResponse(null, 404, 'Selling product not found');
         }
 
-        if($this->getOngoingOrdersCount($selling_product) == $selling_product->quantity) {
-            return sendResponse(null, 405, 'All orders are accepted!');
-        }
-
-        if($this->getOngoingOrdersCount($selling_product) + $order->quantity > $selling_product->quantity){
-            return sendResponse(null,405,'Only'.$selling_product->quantity - $this->getOngoingOrdersCount($selling_product).' in stock!');
-        }
+        // if ($this->getOngoingOrdersCount($selling_product) == $selling_product->quantity) {
+        //     return sendResponse(null, 405, 'All orders are accepted!');
+        // }
 
         $order->status = 'order-accepted';
         $order->save();
 
-        if($this->getOngoingOrdersCount($selling_product) + $order->quantity == $selling_product->quantity) {
-            //hold other pending orders
-            $this->model->where('selling_product_id', $selling_product->id)->where('status', 'order-pending')->update(['status' => 'on-hold']);
+        $selling_product->quantity -= $order->quantity;
 
-            //hold selling product
+        if ($selling_product->quantity == 0) {
             $selling_product->status = 'on-hold';
             $selling_product->save();
+            $this->model->where('selling_product_id', $selling_product->id)->where('status', 'order-pending')->update(['status' => 'on-hold']);
         }
 
         return sendResponse(new OrderResource($order), 200, 'Order accepted!');
@@ -155,6 +151,8 @@ class OrderController extends Controller
         $order->note = $request->note ?? null;
         $order->save();
 
+        $selling_product = SellingProduct::find($order->selling_product_id);
+
         return sendResponse(new OrderResource($order), 200, 'Order paid!');
     }
 
@@ -171,6 +169,14 @@ class OrderController extends Controller
 
         $order->status = 'payment-accepted';
         $order->save();
+
+        $selling_product = SellingProduct::find($order->selling_product_id);
+
+        if($selling_product->status == 'on-hold' && $this->model->where('selling_product_id', $selling_product->id)->where('status', 'payment-pending')->count() == 0) {
+            $selling_product->status = 'sold-out';
+            $this->model->where('selling_product_id', $selling_product->id)->where('status', 'on-hold')->update(['status' => 'order-rejected', 'reject_note' => 'Product sold out']);
+            $selling_product->save();
+        }
 
         return sendResponse(new OrderResource($order), 200, 'Payment accepted!');
     }
@@ -204,20 +210,20 @@ class OrderController extends Controller
         $order->status = 'received';
         $order->save();
 
-        $selling_product = SellingProduct::find($order->selling_product_id);
-        if ($selling_product->quantity == $order->quantity) {
+        // $selling_product = SellingProduct::find($order->selling_product_id);
+        // if ($selling_product->quantity == $order->quantity) {
 
-            //reject other holding orders
-            $this->model->where('selling_product_id', $selling_product->id)->where('status', 'order-pending')->update(['status' => 'order-rejected', 'reject_note' => 'Product sold out!']);
+        //     //reject other holding orders
+        //     $this->model->where('selling_product_id', $selling_product->id)->where('status', 'order-pending')->update(['status' => 'order-rejected', 'reject_note' => 'Product sold out!']);
 
-            //set status sold out selling product
-            $selling_product->status = 'sold-out';
-            $selling_product->save();
-        } else {
+        //     //set status sold out selling product
+        //     $selling_product->status = 'sold-out';
+        //     $selling_product->save();
+        // } else {
 
-            $selling_product->product -= $order->quantity;
-            $selling_product->save();
-        }
+        //     $selling_product->product -= $order->quantity;
+        //     $selling_product->save();
+        // }
 
         return sendResponse(new OrderResource($order), 200, 'Order received!');
     }
@@ -242,8 +248,17 @@ class OrderController extends Controller
         }
 
         //back to pending status for on-hold orders
-        $this->model->where('selling_product_id', $order->selling_product_id)->where('status', 'on-hold')->update(['status' => 'order-pending']);
+        $this->model->where('selling_product_id', $order->selling_product_id)->whereIn('status',['on-hold'])->update(['status' => 'order-pending']);
 
+        $selling_product = SellingProduct::find($order->selling_product_id);
+
+        $selling_product->quantity += $order->quantity;
+
+        if($selling_product->status == 'sold-out' || $selling_product->status == 'on-hold') {
+            $selling_product->status = 'selling';
+        }
+
+        $selling_product->save();
         $order->save();
 
         return sendResponse(new OrderResource($order), 200, 'Order rejected!');

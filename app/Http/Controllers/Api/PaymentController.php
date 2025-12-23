@@ -11,7 +11,14 @@ class PaymentController extends Controller
     public function __construct(protected Payment $model) {}
 
     public function index(){
-        return sendResponse($this->model->get(),200);
+
+        $payments = $this->model->get();
+
+        foreach($payments as $payment){
+            $payment->is_active = $payment->is_active ? 1 : 0;
+        }
+
+        return sendResponse($payments,200);
     }
 
     public function store(Request $request){

@@ -28,6 +28,7 @@ class OrderResource extends JsonResource
             'payment_id' => $this->payment_id,
             // 'payment' => new UserResource($this->whenLoaded('payment')),
             'payment_screenshot' => $this->payment_screenshot ? url('/storage/payments/' . $this->payment_screenshot) : null,
+            'payment_return_screenshot' => $this->payment_return_screenshot ? url('/storage/payments/' . $this->payment_return_screenshot) : null,
             'status' => $this->status,
             'note' => $this->note
         ];
