@@ -26,7 +26,7 @@ class SellingProductResource extends JsonResource
             'condition' => $this->condition,
             'quantity' => $this->quantity,
             'price' => $this->price,
-            'status' => $this->selling,
+            'status' => $this->status,
             'is_active' => $this->is_active,
             'images' => SellingProductImageResource::collection($this->images),
             'payments' => SellingProductPaymentResource::collection($this->payments),
