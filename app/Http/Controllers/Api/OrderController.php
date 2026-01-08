@@ -78,8 +78,8 @@ class OrderController extends Controller
             return sendResponse(null, 404, 'Order not found');
         }
 
-        if ($order->status != 'order-pending' || $order->status != 'on-hold') {
-            return sendResponse(null, 405, 'Seller accepted this order!, you can not refund this order now');
+        if ($order->status != 'order-pending' || $order->status != 'on-hold' || $order->status != 'order-accepted') {
+            return sendResponse(null, 405, 'You just made a payment, you cannot refund this order now.');
         }
 
         $order->delete();
