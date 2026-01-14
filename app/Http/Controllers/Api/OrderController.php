@@ -60,6 +60,10 @@ class OrderController extends Controller
             return sendResponse(null, 404, 'Please order in available quantity');
         }
 
+        if ($selling_product->status == 'sold-out' || $selling_product->status == 'on-hold') {
+            return sendResponse(null, 405, 'You cannot order this product now!');
+        }
+
         $order = $this->model->create($this->toArray($request, $selling_product));
 
         return sendResponse(new OrderResource($order), 201, 'Order created!');
@@ -73,19 +77,32 @@ class OrderController extends Controller
             'note' => 'required'
         ]);
 
+        info($request->all());
+
         $order = $this->model->find($request->id);
         if (!$order) {
             return sendResponse(null, 404, 'Order not found');
         }
 
-        if ($order->status != 'order-pending' || $order->status != 'on-hold' || $order->status != 'order-accepted') {
+        if (!in_array($order->status, ['order-pending', 'on-hold', 'order-accepted'])) {
             return sendResponse(null, 405, 'You just made a payment, you cannot refund this order now.');
         }
 
-        $order->delete();
+        if ($order->status == "order-accepted") {
+            $selling_product = SellingProduct::find($order->selling_product_id);
+            if (!$selling_product) {
+                return sendResponse(null, 404, 'Selling product not found');
+            }
 
-        //back to pending status for on-hold orders
-        $this->model->where('selling_product_id', $order->selling_product_id)->where('status', 'on-hold')->update(['status' => 'order-pending']);
+            $selling_product->quantity += $order->quantity;
+            $selling_product->status = 'selling';
+            $selling_product->save();
+
+            //back to pending status for on-hold orders
+            $this->model->where('selling_product_id', $order->selling_product_id)->where('status', 'on-hold')->update(['status' => 'order-pending']);
+        }
+
+        $order->delete();
 
         return sendResponse(null, 200, 'Order refunded!');
     }
@@ -116,6 +133,7 @@ class OrderController extends Controller
         $order->save();
 
         $selling_product->quantity -= $order->quantity;
+        $selling_product->save();
 
         if ($selling_product->quantity == 0) {
             $selling_product->status = 'on-hold';
@@ -172,7 +190,7 @@ class OrderController extends Controller
 
         $selling_product = SellingProduct::find($order->selling_product_id);
 
-        if($selling_product->status == 'on-hold' && $this->model->where('selling_product_id', $selling_product->id)->where('status', 'payment-pending')->count() == 0) {
+        if ($selling_product->status == 'on-hold' && $this->model->where('selling_product_id', $selling_product->id)->where('status', 'payment-pending')->count() == 0) {
             $selling_product->status = 'sold-out';
             $this->model->where('selling_product_id', $selling_product->id)->where('status', 'on-hold')->update(['status' => 'order-rejected', 'reject_note' => 'Product sold out']);
             $selling_product->save();
@@ -248,13 +266,13 @@ class OrderController extends Controller
         }
 
         //back to pending status for on-hold orders
-        $this->model->where('selling_product_id', $order->selling_product_id)->whereIn('status',['on-hold'])->update(['status' => 'order-pending']);
+        $this->model->where('selling_product_id', $order->selling_product_id)->where('status', 'on-hold')->update(['status' => 'order-pending']);
 
         $selling_product = SellingProduct::find($order->selling_product_id);
 
         $selling_product->quantity += $order->quantity;
 
-        if($selling_product->status == 'sold-out' || $selling_product->status == 'on-hold') {
+        if ($selling_product->status == 'sold-out' || $selling_product->status == 'on-hold') {
             $selling_product->status = 'selling';
         }
 
