@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\SellingProductRequest;
 use App\Http\Resources\SellingProductResource;
 
+use function Laravel\Prompts\info;
+
 class SellingProductController extends Controller
 {
     public function __construct(protected SellingProduct $model) {}
@@ -37,8 +39,24 @@ class SellingProductController extends Controller
                 $query->where('sub_category_id', $request->query('sub-category-id'));
             }
 
+            if($request->query('payment_id')){
+                $query->whereHas('payments', function ($query) use ($request) {
+                    $query->where('payment_id', $request->query('payment_id'));
+                });
+            }
 
-        })->with('payments')->get();
+            if($request->query('price_range')){
+                $start_price = (int) explode(',', $request->query('price_range'))[0];
+                $end_price =  (int) explode(',', $request->query('price_range'))[1];
+                $query->where('price', '>=', $start_price);
+                $query->where('price', '<=', $end_price);
+            }
+
+            if($request->query('searchKey')){
+                $query->whereRaw('LOWER(name) LIKE ?', ['%' . strtolower($request->query('searchKey')) . '%']);
+            }
+
+        })->where('is_active',true)->with('payments')->get();
 
         return sendResponse(SellingProductResource::collection($data), 200);
     }

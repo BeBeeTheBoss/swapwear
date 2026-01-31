@@ -44,7 +44,7 @@ class OrderController extends Controller
                         });
                     }
                 }
-            })->get();
+            })->orderBy('created_at', 'desc')->get();
 
         return sendResponse(OrderResource::collection($orders), 200);
     }
@@ -73,8 +73,7 @@ class OrderController extends Controller
     {
 
         $request->validate([
-            'id' => 'required',
-            'note' => 'required'
+            'id' => 'required'
         ]);
 
         info($request->all());
