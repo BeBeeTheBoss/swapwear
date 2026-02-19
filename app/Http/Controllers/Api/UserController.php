@@ -65,7 +65,7 @@ class UserController extends Controller
         $user->save();
 
         if($request->file('image')){
-            $imageName = storeImage($request->file('image'), '/profile_images/'); //store image to destination folder
+            $imageName = storeFile($request->file('image'), '/profile_images/'); //store image to destination folder
             $user->image = $imageName;
             $user->save();
         }

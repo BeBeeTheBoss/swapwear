@@ -33,7 +33,7 @@ class MainCategoryService
         ]);
 
         if ($request->file('icon')) {
-            $imageName = storeImage($request->file('icon'), '/icons/'); //store icons to destination folder
+            $imageName = storeFile($request->file('icon'), '/icons/'); //store icons to destination folder
         }
 
         return $this->model->create([
@@ -55,7 +55,7 @@ class MainCategoryService
         $main_category->name = $request->name;
 
         if ($request->file('icon')) {
-            $imageName = storeImage($request->file('icon'), '/icons/'); //store icons to destination folder
+            $imageName = storeFile($request->file('icon'), '/icons/'); //store icons to destination folder
             $main_category->icon = $imageName;
         }
 

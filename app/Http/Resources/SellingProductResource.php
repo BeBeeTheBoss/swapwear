@@ -28,6 +28,7 @@ class SellingProductResource extends JsonResource
             'price' => $this->price,
             'status' => $this->status,
             'is_active' => $this->is_active,
+            'video' => $this->video ? url('/storage/product_videos/' . $this->video) : null,
             'images' => SellingProductImageResource::collection($this->images),
             'payments' => SellingProductPaymentResource::collection($this->payments),
             'created_at' => $this->created_at,

@@ -25,7 +25,7 @@ class SubCategoryService
     public function create($request)
     {
         if ($request->file('icon')) {
-            $imageName = storeImage($request->file('icon'), '/icons/'); //store icons to destination folder
+            $imageName = storeFile($request->file('icon'), '/icons/'); //store icons to destination folder
             // $request->merge(['icon' => $imageName]);
         }
 
@@ -43,7 +43,7 @@ class SubCategoryService
         $sub_category->main_category_id = $request->main_category_id;
 
         if ($request->file('icon')) {
-            $imageName = storeImage($request->file('icon'), '/icons/'); //store icons to destination folder
+            $imageName = storeFile($request->file('icon'), '/icons/'); //store icons to destination folder
             $sub_category->icon = $imageName;
         }
 

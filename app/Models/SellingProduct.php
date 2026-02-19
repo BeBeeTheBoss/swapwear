@@ -17,6 +17,7 @@ class SellingProduct extends Model
         'condition',
         'quantity',
         'price',
+        'video',
         'status',
         'is_active'
     ];

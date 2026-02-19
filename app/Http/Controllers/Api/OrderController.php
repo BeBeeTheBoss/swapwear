@@ -160,7 +160,7 @@ class OrderController extends Controller
         $order->payment_id = $request->payment_id;
 
         if ($request->file('payment_screenshot')) {
-            $imageName = storeImage($request->file('payment_screenshot'), '/payments/'); //store image to destination folder
+            $imageName = storeFile($request->file('payment_screenshot'), '/payments/'); //store image to destination folder
             $order->payment_screenshot = $imageName;
         }
 
@@ -260,7 +260,7 @@ class OrderController extends Controller
         $order->reject_note = $request->reject_note ?? null;
 
         if ($request->file('payment_return_screenshot')) {
-            $imageName = storeImage($request->file('payment_return_screenshot'), '/payments/'); //store image to destination folder
+            $imageName = storeFile($request->file('payment_return_screenshot'), '/payments/'); //store image to destination folder
             $order->payment_return_screenshot = $imageName;
         }
 

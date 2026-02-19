@@ -11,10 +11,10 @@ function sendResponse($data, $status, $message = "No Message")
     return response()->json($response);
 }
 
-function storeImage($imageFile, $path)
+function storeFile($file, $path)
 {
-    $imageName = uniqid() . '_' . time() . '.' . $imageFile->getClientOriginalExtension();
-    $imageFile->storeAs('public' . $path, $imageName);
+    $fileName = uniqid() . '_' . time() . '.' . $file->getClientOriginalExtension();
+    $file->storeAs('public' . $path, $fileName);
 
-    return $imageName;
+    return $fileName;
 }

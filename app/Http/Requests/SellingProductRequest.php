@@ -28,6 +28,7 @@ class SellingProductRequest extends FormRequest
             'condition' => 'required',
             'price' => 'required',
             'quantity' => 'required',
+            'video' => 'nullable|file|mimes:mp4,mov,avi,wmv,webm,mkv|max:102400',
         ];
     }
 }
