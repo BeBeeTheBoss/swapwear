@@ -74,4 +74,35 @@ class UserController extends Controller
 
     }
 
+    public function updateNrcImages(Request $request)
+    {
+        $user = $this->model->find(Auth::user()->id);
+        if (!$user) {
+            return sendResponse(null, 404, 'User not found');
+        }
+
+        $request->validate([
+            'nrc_front_image' => ['nullable', 'image', 'max:5120'],
+            'nrc_back_image' => ['nullable', 'image', 'max:5120'],
+        ]);
+
+        if ($request->file('nrc_front_image')) {
+            if ($user->nrc_front_image) {
+                Storage::delete('/public/nrc_images/' . $user->nrc_front_image);
+            }
+            $user->nrc_front_image = storeFile($request->file('nrc_front_image'), '/nrc_images/');
+        }
+
+        if ($request->file('nrc_back_image')) {
+            if ($user->nrc_back_image) {
+                Storage::delete('/public/nrc_images/' . $user->nrc_back_image);
+            }
+            $user->nrc_back_image = storeFile($request->file('nrc_back_image'), '/nrc_images/');
+        }
+
+        $user->save();
+
+        return sendResponse(new UserResource($user), 200, 'Your NRC images have been updated');
+    }
+
 }

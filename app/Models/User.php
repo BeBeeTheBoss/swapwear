@@ -31,6 +31,9 @@ class User extends Authenticatable
         'oauth_id',
         'oauth_type',
         'oauth_image',
+        'nrc_front_image',
+        'nrc_back_image',
+        'is_approved',
     ];
 
     //connect with social media link
@@ -62,5 +65,6 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'is_approved' => 'boolean',
     ];
 }

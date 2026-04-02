@@ -33,6 +33,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/{id?}','index');
         Route::post('/update','update');
         Route::post('/update-profile','updatePfp');
+        Route::post('/update-nrc','updateNrcImages');
     });
 
     //main categories
