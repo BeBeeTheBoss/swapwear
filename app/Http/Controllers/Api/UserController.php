@@ -82,8 +82,8 @@ class UserController extends Controller
         }
 
         $request->validate([
-            'nrc_front_image' => ['nullable', 'image', 'max:5120'],
-            'nrc_back_image' => ['nullable', 'image', 'max:5120'],
+            'nrc_front_image' => ['required', 'image'],
+            'nrc_back_image' => ['required', 'image'],
         ]);
 
         if ($request->file('nrc_front_image')) {
