@@ -86,7 +86,7 @@ class SellingProductController extends Controller
             foreach ($request->payments as $payment) {
                 SellingProductPayment::create([
                     'selling_product_id' => $selling_product->id,
-                    'payment_id' => $payment['id']
+                    'payment_id' => intval($payment['id']),
                 ]);
             }
 

@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\SubCategoryController;
 use App\Http\Controllers\Api\MainCategoryController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\SellingProductController;
+use App\Http\Controllers\Api\NotificationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -79,6 +80,18 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/','store');
         Route::post('/update','update');
         Route::delete('/','destroy');
+    });
+
+    //notifications
+    Route::group(['prefix' => '/notifications', 'controller' => NotificationController::class], function () {
+        Route::get('/me', 'myNotifications');
+        Route::get('/unread-count', 'unreadCount');
+        Route::get('/{id?}', 'index');
+        Route::post('/', 'store');
+        Route::post('/update', 'update');
+        Route::post('/mark-read', 'markAsRead');
+        Route::post('/mark-all-read', 'markAllAsRead');
+        Route::delete('/', 'destroy');
     });
 
 

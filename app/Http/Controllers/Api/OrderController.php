@@ -2,15 +2,16 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\Order;
-use Illuminate\Support\Str;
-use Illuminate\Http\Request;
-use App\Models\SellingProduct;
-use App\Http\Requests\OrderRequest;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\OrderRequest;
 use App\Http\Resources\OrderResource;
+use App\Models\Notification;
+use App\Models\Order;
+use App\Models\SellingProduct;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Str;
 
 class OrderController extends Controller
 {
@@ -65,6 +66,11 @@ class OrderController extends Controller
         }
 
         $order = $this->model->create($this->toArray($request, $selling_product));
+
+        Notification::create([
+            'title' => 'New Order',
+            'message' => 'You have a new order for your product: ' . $selling_product->name,
+        ])->users()->attach($selling_product->user_id);
 
         return sendResponse(new OrderResource($order), 201, 'Order created!');
     }

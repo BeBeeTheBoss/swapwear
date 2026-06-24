@@ -48,6 +48,14 @@ class User extends Authenticatable
         return $this->hasMany(SellingProduct::class);
     }
 
+    //connect with notifications
+    public function notifications()
+    {
+        return $this->belongsToMany(Notification::class, 'notifications_user')
+            ->withPivot('is_read', 'read_at')
+            ->withTimestamps();
+    }
+
     /**
      * The attributes that should be hidden for serialization.
      *
