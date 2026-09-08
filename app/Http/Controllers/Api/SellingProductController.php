@@ -21,6 +21,7 @@ class SellingProductController extends Controller
 
     public function index(Request $request, $id = null)
     {
+
         $data = $this->model->when($id, function ($query) use ($id) {
             $query->where('id', $id);
         })->when($request->query, function ($query) use ($request) {

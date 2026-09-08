@@ -125,6 +125,10 @@ return [
 
     'cipher' => 'AES-256-CBC',
 
+    'project_id' => env('FIREBASE_PROJECT_ID'),
+
+    'GOOGLE_APPLICATION_CREDENTIALS' => env('FIREBASE_CREDENTIALS_JSON'),
+
     /*
     |--------------------------------------------------------------------------
     | Maintenance Mode Driver

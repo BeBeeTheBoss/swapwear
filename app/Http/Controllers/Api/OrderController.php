@@ -11,6 +11,7 @@ use App\Models\SellingProduct;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class OrderController extends Controller
@@ -67,10 +68,11 @@ class OrderController extends Controller
 
         $order = $this->model->create($this->toArray($request, $selling_product));
 
-        Notification::create([
-            'title' => 'New Order',
-            'message' => 'You have a new order for your product: ' . $selling_product->name,
-        ])->users()->attach($selling_product->user_id);
+        $this->notifyUser(
+            $order->seller_id,
+            'New Order',
+            "You have received a new order ({$order->order_code}) for {$selling_product->name}."
+        );
 
         return sendResponse(new OrderResource($order), 201, 'Order created!');
     }
@@ -104,8 +106,26 @@ class OrderController extends Controller
             $selling_product->save();
 
             //back to pending status for on-hold orders
-            $this->model->where('selling_product_id', $order->selling_product_id)->where('status', 'on-hold')->update(['status' => 'order-pending']);
+            $heldOrders = $this->model
+                ->where('selling_product_id', $order->selling_product_id)
+                ->where('status', 'on-hold')
+                ->get();
+
+            $heldOrders->each(function ($heldOrder) {
+                $heldOrder->update(['status' => 'order-pending']);
+                $this->notifyUser(
+                    $heldOrder->user_id,
+                    'Order Available Again',
+                    "Your order ({$heldOrder->order_code}) is pending again."
+                );
+            });
         }
+
+        $this->notifyUser(
+            $order->seller_id,
+            'Order Cancelled',
+            "The buyer cancelled order {$order->order_code}."
+        );
 
         $order->delete();
 
@@ -137,13 +157,31 @@ class OrderController extends Controller
         $order->status = 'order-accepted';
         $order->save();
 
+        $this->notifyUser(
+            $order->user_id,
+            'Order Accepted',
+            "Your order ({$order->order_code}) has been accepted."
+        );
+
         $selling_product->quantity -= $order->quantity;
         $selling_product->save();
 
         if ($selling_product->quantity == 0) {
             $selling_product->status = 'on-hold';
             $selling_product->save();
-            $this->model->where('selling_product_id', $selling_product->id)->where('status', 'order-pending')->update(['status' => 'on-hold']);
+            $pendingOrders = $this->model
+                ->where('selling_product_id', $selling_product->id)
+                ->where('status', 'order-pending')
+                ->get();
+
+            $pendingOrders->each(function ($pendingOrder) {
+                $pendingOrder->update(['status' => 'on-hold']);
+                $this->notifyUser(
+                    $pendingOrder->user_id,
+                    'Order On Hold',
+                    "Your order ({$pendingOrder->order_code}) is currently on hold."
+                );
+            });
         }
 
         return sendResponse(new OrderResource($order), 200, 'Order accepted!');
@@ -176,6 +214,12 @@ class OrderController extends Controller
 
         $selling_product = SellingProduct::find($order->selling_product_id);
 
+        $this->notifyUser(
+            $order->seller_id,
+            'Payment Submitted',
+            "Payment for order {$order->order_code} has been submitted for review."
+        );
+
         return sendResponse(new OrderResource($order), 200, 'Order paid!');
     }
 
@@ -193,11 +237,32 @@ class OrderController extends Controller
         $order->status = 'payment-accepted';
         $order->save();
 
+        $this->notifyUser(
+            $order->user_id,
+            'Payment Accepted',
+            "Your payment for order {$order->order_code} has been accepted."
+        );
+
         $selling_product = SellingProduct::find($order->selling_product_id);
 
         if ($selling_product->status == 'on-hold' && $this->model->where('selling_product_id', $selling_product->id)->where('status', 'payment-pending')->count() == 0) {
             $selling_product->status = 'sold-out';
-            $this->model->where('selling_product_id', $selling_product->id)->where('status', 'on-hold')->update(['status' => 'order-rejected', 'reject_note' => 'Product sold out']);
+            $heldOrders = $this->model
+                ->where('selling_product_id', $selling_product->id)
+                ->where('status', 'on-hold')
+                ->get();
+
+            $heldOrders->each(function ($heldOrder) {
+                $heldOrder->update([
+                    'status' => 'order-rejected',
+                    'reject_note' => 'Product sold out',
+                ]);
+                $this->notifyUser(
+                    $heldOrder->user_id,
+                    'Order Rejected',
+                    "Your order ({$heldOrder->order_code}) was rejected because the product is sold out."
+                );
+            });
             $selling_product->save();
         }
 
@@ -217,6 +282,14 @@ class OrderController extends Controller
 
         $order->status = 'delivered';
         $order->save();
+
+        $this->notifyUser(
+            $order->user_id,
+            'Order Delivered',
+            "Your order ({$order->order_code}) has been marked as delivered."
+        );
+
+        return sendResponse(new OrderResource($order), 200, 'Order delivered!');
     }
 
     public function received(Request $request)
@@ -232,6 +305,12 @@ class OrderController extends Controller
 
         $order->status = 'received';
         $order->save();
+
+        $this->notifyUser(
+            $order->seller_id,
+            'Order Received',
+            "The buyer has confirmed receipt of order {$order->order_code}."
+        );
 
         // $selling_product = SellingProduct::find($order->selling_product_id);
         // if ($selling_product->quantity == $order->quantity) {
@@ -262,7 +341,8 @@ class OrderController extends Controller
             return sendResponse(null, 404, 'Order not found');
         }
 
-        $order->status = $order->status == 'payment-pending' ? 'payment-rejected' : 'order-rejected';
+        $isPaymentRejection = $order->status == 'payment-pending';
+        $order->status = $isPaymentRejection ? 'payment-rejected' : 'order-rejected';
         $order->reject_note = $request->reject_note ?? null;
 
         if ($request->file('payment_return_screenshot')) {
@@ -271,7 +351,19 @@ class OrderController extends Controller
         }
 
         //back to pending status for on-hold orders
-        $this->model->where('selling_product_id', $order->selling_product_id)->where('status', 'on-hold')->update(['status' => 'order-pending']);
+        $heldOrders = $this->model
+            ->where('selling_product_id', $order->selling_product_id)
+            ->where('status', 'on-hold')
+            ->get();
+
+        $heldOrders->each(function ($heldOrder) {
+            $heldOrder->update(['status' => 'order-pending']);
+            $this->notifyUser(
+                $heldOrder->user_id,
+                'Order Available Again',
+                "Your order ({$heldOrder->order_code}) is pending again."
+            );
+        });
 
         $selling_product = SellingProduct::find($order->selling_product_id);
 
@@ -283,6 +375,17 @@ class OrderController extends Controller
 
         $selling_product->save();
         $order->save();
+
+        $title = $isPaymentRejection ? 'Payment Rejected' : 'Order Rejected';
+        $message = $isPaymentRejection
+            ? "Your payment for order {$order->order_code} was rejected."
+            : "Your order ({$order->order_code}) was rejected.";
+
+        if ($order->reject_note) {
+            $message .= ' Reason: ' . $order->reject_note;
+        }
+
+        $this->notifyUser($order->user_id, $title, $message);
 
         return sendResponse(new OrderResource($order), 200, 'Order rejected!');
     }
@@ -296,6 +399,26 @@ class OrderController extends Controller
             ->sum('quantity');
 
         return $ongoingOrdersCount;
+    }
+
+    private function notifyUser(int $userId, string $title, string $message): void
+    {
+        $notification = Notification::create([
+            'title' => $title,
+            'message' => $message,
+        ]);
+
+        $notification->users()->attach($userId);
+
+        try {
+            send_notification_FCM($title, $message, $userId);
+        } catch (\Throwable $exception) {
+            Log::warning('Failed to send an order push notification.', [
+                'user_id' => $userId,
+                'notification_id' => $notification->id,
+                'error' => $exception->getMessage(),
+            ]);
+        }
     }
 
     private function toArray($request, $selling_product)

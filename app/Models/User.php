@@ -34,6 +34,7 @@ class User extends Authenticatable
         'nrc_front_image',
         'nrc_back_image',
         'is_approved',
+        'device_token',
     ];
 
     //connect with social media link
@@ -64,6 +65,7 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'device_token',
     ];
 
     /**

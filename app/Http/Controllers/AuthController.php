@@ -41,6 +41,7 @@ class AuthController extends Controller
             $user = $this->model->create($request->image ? $this->toArray($request->except('image')) : $this->toArray($request));
 
             $user = $this->model->find($user->id);
+            $user->device_token = $request->device_token ?? null;
             Auth::login($user);
 
             $token = $user->createToken(config('app.name') . '_Token')->plainTextToken;
@@ -72,6 +73,8 @@ class AuthController extends Controller
             return sendResponse(null, 401, "Please input login method");
         }
 
+        info($request->all());
+
         if ($request->login_method == 'phone') {
             $user = $this->loginWithPhoneNumber($request->phone, $request->password);
         }else{
@@ -91,6 +94,9 @@ class AuthController extends Controller
         if (!$user) {
             return sendResponse(null, 401, "Login failed!, Please check your information");
         }
+
+        $user->device_token = $request->device_token;
+        $user->save();
 
         Auth::loginUsingId($user->id);
         $token = $user->createToken(config('app.name') . '_Token')->plainTextToken;
