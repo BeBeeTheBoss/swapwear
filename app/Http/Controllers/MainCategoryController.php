@@ -19,6 +19,7 @@ class MainCategoryController extends Controller
     {
 
         $main_categories = $this->service->get($request);
+        $main_categories->loadCount('sub_categories');
         $main_categories = MainCategoryResource::collection($main_categories);
 
         return Inertia::render('Resources/MainCategories/Index', [

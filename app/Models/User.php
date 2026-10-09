@@ -57,6 +57,11 @@ class User extends Authenticatable
             ->withTimestamps();
     }
 
+    public function verificationRequests()
+    {
+        return $this->hasMany(VerifiedApproveRequest::class);
+    }
+
     /**
      * The attributes that should be hidden for serialization.
      *

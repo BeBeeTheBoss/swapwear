@@ -22,6 +22,10 @@ class SellingProduct extends Model
         'is_active'
     ];
 
+    protected $casts = [
+        'is_active' => 'boolean',
+    ];
+
     //connect with payments
     public function payments(){
         return $this->hasMany(SellingProductPayment::class);
@@ -43,6 +47,11 @@ class SellingProduct extends Model
     public function images()
     {
         return $this->hasMany(SellingProductImage::class);
+    }
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
     }
 
 }

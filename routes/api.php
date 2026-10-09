@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\MainCategoryController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\SellingProductController;
 use App\Http\Controllers\Api\NotificationController;
+use App\Http\Controllers\Api\BannerController;
 
 /*
 |--------------------------------------------------------------------------
@@ -25,6 +26,9 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('/register', 'register');
     Route::post('/login', 'login');
 });
+
+// Public banners (read only)
+Route::get('/banners', [BannerController::class, 'index']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);

@@ -8,6 +8,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
+use App\Models\VerifiedApproveRequest;
 
 class UserController extends Controller
 {
@@ -86,23 +88,33 @@ class UserController extends Controller
             'nrc_back_image' => ['required', 'image'],
         ]);
 
-        if ($request->file('nrc_front_image')) {
-            if ($user->nrc_front_image) {
-                Storage::delete('/public/nrc_images/' . $user->nrc_front_image);
-            }
-            $user->nrc_front_image = storeFile($request->file('nrc_front_image'), '/nrc_images/');
-        }
+        $frontImage = storeFile($request->file('nrc_front_image'), '/nrc_images/');
+        $backImage = storeFile($request->file('nrc_back_image'), '/nrc_images/');
 
-        if ($request->file('nrc_back_image')) {
-            if ($user->nrc_back_image) {
-                Storage::delete('/public/nrc_images/' . $user->nrc_back_image);
-            }
-            $user->nrc_back_image = storeFile($request->file('nrc_back_image'), '/nrc_images/');
-        }
+        DB::transaction(function () use ($user, $frontImage, $backImage) {
+            VerifiedApproveRequest::where('user_id', $user->id)->where('status', 'pending')->update([
+                'status' => 'superseded',
+                'review_note' => 'Replaced by a newer NRC submission.',
+                'reviewed_at' => now(),
+            ]);
 
-        $user->save();
+            $user->update([
+                'nrc_front_image' => $frontImage,
+                'nrc_back_image' => $backImage,
+                'is_approved' => false,
+            ]);
 
-        return sendResponse(new UserResource($user), 200, 'Your NRC images have been updated');
+            VerifiedApproveRequest::create([
+                'user_id' => $user->id,
+                'nrc_front_image' => $frontImage,
+                'nrc_back_image' => $backImage,
+                'status' => 'pending',
+            ]);
+        });
+
+        $user->refresh();
+
+        return sendResponse(new UserResource($user), 200, 'Your NRC images were submitted for verification');
     }
 
 }

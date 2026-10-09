@@ -1,22 +1,17 @@
 <template>
-    <div>
-        <Header/>
-        <div class="container">
-            <slot/>
+    <div class="admin-shell">
+        <Navbar :open="sidebarOpen" @close="sidebarOpen = false" />
+        <div v-if="sidebarOpen" class="sidebar-scrim" @click="sidebarOpen = false"></div>
+        <div class="admin-main">
+            <Header @toggle-menu="sidebarOpen = !sidebarOpen" />
+            <main class="admin-content"><slot /></main>
         </div>
-        <Navbar/>
     </div>
 </template>
 
 <script setup>
+import { ref } from 'vue';
 import Navbar from './Navbar.vue';
 import Header from './Header.vue';
-import { ref } from 'vue';
-import { usePage } from '@inertiajs/vue3';
-const page = usePage();
-
-const currentUrl = ref(page.url);
-
+const sidebarOpen = ref(false);
 </script>
-
-<style></style>

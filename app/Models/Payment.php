@@ -14,4 +14,18 @@ class Payment extends Model
         'is_active',
     ];
 
+    protected $casts = [
+        'is_active' => 'boolean',
+    ];
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    public function productPayments()
+    {
+        return $this->hasMany(SellingProductPayment::class);
+    }
+
 }

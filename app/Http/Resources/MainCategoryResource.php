@@ -20,6 +20,7 @@ class MainCategoryResource extends JsonResource
             'icon' => url('storage/icons/' . $this->icon),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
+            'sub_categories_count' => $this->whenCounted('sub_categories'),
             'sub_categories' => SubCategoryResource::collection($this->whenLoaded('sub_categories'))
         ];
 
