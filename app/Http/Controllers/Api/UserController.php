@@ -59,6 +59,26 @@ class UserController extends Controller
         return sendResponse(new UserResource($user), 200, 'Your data has been updated');
     }
 
+    public function changePassword(Request $request)
+    {
+        $data = $request->validate([
+            'old_password' => ['required', 'string'],
+            'new_password' => ['required', 'string', PasswordRule::min(8), 'different:old_password'],
+        ]);
+
+        $user = $request->user();
+
+        if (!$user->password || !Hash::check($data['old_password'], $user->password)) {
+            return sendResponse(null, 422, 'The old password is incorrect.');
+        }
+
+        $user->update([
+            'password' => Hash::make($data['new_password']),
+        ]);
+
+        return sendResponse(null, 200, 'Your password has been changed successfully.');
+    }
+
     public function updatePfp(Request $request){
         $user = $this->model->find(Auth::user()->id);
 

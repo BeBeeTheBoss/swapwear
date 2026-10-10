@@ -37,6 +37,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::group(['prefix' => '/users','controller' => UserController::class], function () {
         Route::get('/{id?}','index');
         Route::post('/update','update');
+        Route::post('/change-password','changePassword')->middleware('throttle:5,1');
         Route::post('/update-profile','updatePfp');
         Route::post('/update-nrc','updateNrcImages');
     });
